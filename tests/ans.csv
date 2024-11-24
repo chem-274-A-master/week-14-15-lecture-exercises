@@ -1,0 +1,11 @@
+,iupac,smiles,expt,calc
+50,tetrafluoromethane,C(F)(F)(F)F,3.12,2.489
+51,2-methylbutan-1-ol,CC[C@@H](C)CO,-4.42,-2.995
+52,2-iodophenol,c1ccc(c(c1)O)I,-6.2,-3.221
+53,"2,6-dimethoxyphenol",COc1cccc(c1O)OC,-6.96,-7.393
+54,but-1-yne,CCC#C,-0.16,0.284
+55,trifluoromethylbenzene,c1ccc(cc1)C(F)(F)F,-0.25,-0.57
+56,hydrazine,NN,-9.3,-6.508
+57,2-methylpyridine,Cc1ccccn1,-4.63,-3.501
+58,simazine,CCNc1nc(nc(n1)Cl)NCC,-10.22,-10.914
+59,"2,3-dichlorodibenzo-p-dioxin",c1ccc2c(c1)Oc3cc(c(cc3O2)Cl)Cl,-3.56,-3.59
