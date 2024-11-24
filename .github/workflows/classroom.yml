@@ -1,0 +1,128 @@
+name: Autograding Tests
+'on':
+  - push
+  - repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Install dependencies
+        run: |
+          pip install pytest
+          pip install numpy
+          pip install pandas
+          pip install matplotlib
+
+      - name: 01numpy01 Test
+        id: 01numpy01
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: 01numpy01
+          command: pytest -vk "test_01numpy01"
+          timeout: 20
+          max-score: 1
+
+      - name: 01numpy02 Test
+        id: 01numpy02
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: 01numpy02
+          command: pytest -vk "test_01numpy02"
+          timeout: 20
+          max-score: 1
+
+      - name: 01numpy03 Test
+        id: 01numpy03
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: 01numpy03
+          command: pytest -vk "test_01numpy03"
+          timeout: 20
+          max-score: 1
+
+      - name: 02pandas01 Test
+        id: 02pandas01
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: 02pandas01
+          command: pytest -vk "test_02pandas01"
+          timeout: 20
+          max-score: 1
+
+      - name: 02pandas02 Test
+        id: 02pandas02
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: 02pandas02
+          command: pytest -vk "test_02pandas02"
+          timeout: 20
+          max-score: 1
+
+      - name: 02pandas03 Test
+        id: 02pandas03
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: 02pandas03
+          command: pytest -vk "test_02pandas03"
+          timeout: 20
+          max-score: 1
+
+      - name: 02pandas04 Test
+        id: 02pandas04
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: 02pandas04
+          command: pytest -vk "test_02pandas04"
+          timeout: 20
+          max-score: 1
+
+      - name: 02pandas05 Test
+        id: 02pandas05
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: 02pandas05
+          command: pytest -vk "test_02pandas05"
+          timeout: 20
+          max-score: 1
+
+      - name: 03matplotlib01 Test
+        id: 03matplotlib01
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: 03matplotlib01
+          command: pytest -vk "test_03matplotlib01"
+          timeout: 20
+          max-score: 1
+
+      - name: 03matplotlib02 Test
+        id: 03matplotlib02
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: 03matplotlib02
+          command: pytest -vk "test_03matplotlib02"
+          timeout: 20
+          max-score: 1
+
+      - name: Autograding Reporter
+        uses: classroom-resources/autograding-grading-reporter@v1
+        env:
+          01NUMPY01_RESULTS: "${{steps.01numpy01.outputs.result}}"
+          01NUMPY02_RESULTS: "${{steps.01numpy02.outputs.result}}"
+          01NUMPY03_RESULTS: "${{steps.01numpy03.outputs.result}}"
+          02PANDAS01_RESULTS: "${{steps.02pandas01.outputs.result}}"
+          02PANDAS02_RESULTS: "${{steps.02pandas02.outputs.result}}"
+          02PANDAS03_RESULTS: "${{steps.02pandas03.outputs.result}}"
+          02PANDAS04_RESULTS: "${{steps.02pandas04.outputs.result}}"
+          02PANDAS05_RESULTS: "${{steps.02pandas05.outputs.result}}"
+          03MATPLOTLIB01_RESULTS: "${{steps.03matplotlib01.outputs.result}}"
+          03MATPLOTLIB02_RESULTS: "${{steps.03matplotlib02.outputs.result}}"
+        with:
+          runners: 01numpy01,01numpy02,01numpy03,02pandas01,02pandas02,02pandas03,02pandas04,02pandas05,03matplotlib01,03matplotlib02
