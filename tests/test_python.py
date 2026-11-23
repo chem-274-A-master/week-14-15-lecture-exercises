@@ -1,19 +1,44 @@
 """
-Tests for NumPy Array Reshaping Exercise.
+Behavior checks for Weeks 14 and 15 lecture exercises.
 """
 
-import os
-import sys
+import importlib.util
+from pathlib import Path
+
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 import numpy as np
 
 import pytest
 
-def test_01numpy01():
-    # Add the exercise directory to the Python path
-    exercise_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "01numpy01"))
-    sys.path.append(exercise_dir)
-    
-    from main import reshape_array, InvalidShapeError
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def load_exercise(name, monkeypatch):
+    """Load each main.py independently, allowing exercise-local imports."""
+    exercise_dir = ROOT / name
+    monkeypatch.syspath_prepend(str(exercise_dir))
+    spec = importlib.util.spec_from_file_location(
+        f"weeks14_15_{name}", exercise_dir / "main.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+@pytest.fixture(autouse=True)
+def close_figures():
+    yield
+    plt.close("all")
+
+
+def test_01numpy01(monkeypatch):
+    module = load_exercise("01numpy01", monkeypatch)
+    reshape_array = module.reshape_array
+    InvalidShapeError = module.InvalidShapeError
 
     # Test 1: Valid reshaping
     arr = np.random.random(50)
@@ -27,17 +52,15 @@ def test_01numpy01():
     assert reshaped_array.shape == (5, 2, 3), "Reshaped array has incorrect shape"
     assert third_dim == 3, "Third dimension size is incorrect"
 
-    # Test 3: Invalid reshaping (should raise ValueError)
+    # Test 3: Invalid reshaping (should raise InvalidShapeError)
     with pytest.raises(InvalidShapeError):
         arr = np.random.random(53)
         reshaped_array, third_dim = reshape_array(arr)
 
-def test_01numpy02():
-    # Add the exercise directory to the Python path
-    exercise_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "01numpy02"))
-    sys.path.append(exercise_dir)
-    
-    from main import answer
+
+def test_01numpy02(monkeypatch):
+    module = load_exercise("01numpy02", monkeypatch)
+    answer = module.answer
 
     # Manually create the expected identity matrix for n=6
     n = 6
@@ -48,12 +71,11 @@ def test_01numpy02():
     # Test if the answer is correct
     assert np.array_equal(answer, expected), f"Identity matrix is incorrect. Expected:\n{expected}\nGot:\n{answer}"
 
-def test_01numpy03():
-    # Add the exercise directory to the Python path
-    exercise_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "01numpy03"))
-    sys.path.append(exercise_dir)
-    
-    from main import add_to_rows, InvalidDimensionError
+
+def test_01numpy03(monkeypatch):
+    module = load_exercise("01numpy03", monkeypatch)
+    add_to_rows = module.add_to_rows
+    InvalidDimensionError = module.InvalidDimensionError
 
     # Test 1: Basic example
     matrix = np.array([[1, 2, 3], [4, 5, 6]])
@@ -75,18 +97,17 @@ def test_01numpy03():
         row_values = np.array([1, 2, 3])  # Mismatched length
         add_to_rows(matrix, row_values)
 
-def test_02pandas01():
+
+def test_02pandas01(monkeypatch):
 
     import pandas as pd
 
-    # Add the exercise directory to the Python path
-    exercise_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "02pandas01"))
-    sys.path.append(exercise_dir)
-    
-    from main import df, expt_mean
+    module = load_exercise("02pandas01", monkeypatch)
+    df = module.df
+    expt_mean = module.expt_mean
 
     # Load the reference data for testing
-    reference_df = pd.read_csv(os.path.join(exercise_dir,"SAMPL.csv"))
+    reference_df = pd.read_csv(ROOT / "02pandas01" / "SAMPL.csv")
 
     # Test if the DataFrame was loaded correctly
     assert len(df) == len(reference_df), "DataFrame does not have the correct number of rows."
@@ -96,15 +117,13 @@ def test_02pandas01():
     expected_mean = reference_df['expt'].mean()
     assert expt_mean == expected_mean, f"Mean of 'expt' is incorrect. Expected: {expected_mean}, Got: {expt_mean}"
 
-def test_02pandas02():
+
+def test_02pandas02(monkeypatch):
 
     import pandas as pd
 
-    # Add the exercise directory to the Python path
-    exercise_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "02pandas02"))
-    sys.path.append(exercise_dir)
-    
-    from main import df
+    module = load_exercise("02pandas02", monkeypatch)
+    df = module.df
 
     # Assert the shape of the DataFrame
     assert df.shape == (356, 2), "DataFrame has incorrect shape."
@@ -112,37 +131,31 @@ def test_02pandas02():
     # Assert the columns of the DataFrame
     assert list(df.columns) == ['deltaH', 'deltaG'], "DataFrame has incorrect columns."
 
-def test_02pandas03():
-    
+
+def test_02pandas03(monkeypatch):
+
     import pandas as pd
 
-    # Add the exercise directory to the Python path
-    exercise_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "02pandas03"))
-    sys.path.append(exercise_dir)
-
-    from main import ans
+    module = load_exercise("02pandas03", monkeypatch)
+    ans = module.ans
 
     # Load the reference data for testing
     # The reference data is saved in a CSV file in this folder
-    module_path = os.path.abspath(os.path.dirname(__file__))
-    reference_df = pd.read_csv(os.path.join(module_path, "ans.csv"), index_col=0)
-
-    #breakpoint()
+    reference_df = pd.read_csv(ROOT / "tests" / "ans.csv", index_col=0)
 
     # Test that reference data and the answer are the same
     assert ans.equals(reference_df), "DataFrames are not equal."
 
-def test_02pandas04():
+
+def test_02pandas04(monkeypatch):
 
     import pandas as pd
 
     import inspect
 
-    # Add the exercise directory to the Python path
-    exercise_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "02pandas04"))
-    sys.path.append(exercise_dir)
-
-    from main import round_method, apply_method
+    module = load_exercise("02pandas04", monkeypatch)
+    round_method = module.round_method
+    apply_method = module.apply_method
 
     source1 = inspect.getsource(round_method)
     source2 = inspect.getsource(apply_method)
@@ -163,40 +176,35 @@ def test_02pandas04():
     # Assert that the two methods give the same result
     assert rounded1.equals(rounded2), "The two methods do not give the same result."
 
-def test_02pandas05():
+
+def test_02pandas05(monkeypatch):
     import pandas as pd
 
-    # Add the exercise directory to the Python path
-    exercise_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "02pandas05"))
-    sys.path.append(exercise_dir)
-
-    # Import the main module
-    from main import find_carbon_extremes
+    module = load_exercise("02pandas05", monkeypatch)
+    find_carbon_extremes = module.find_carbon_extremes
 
     # Test with molecules having same number of carbons but different SMILES representations
     df = pd.DataFrame({
        'smiles': ['c1ccccc1', 'CCCCCC', 'C', 'CC'],
        'iupac': ['benzene', 'cyclohexane', 'methane', 'ethane']
    })
-    
+
     most_carbons, least_carbons = find_carbon_extremes(df)
-   
+
     # benzene and cyclohexane both have 6 carbons
     # benzene should be returned since it comes first alphabetically
     assert most_carbons == 'benzene'
-    
+
     # methane has 1 carbon, ethane has 2
     assert least_carbons == 'methane'
 
-def test_03matplotlib01():
+
+def test_03matplotlib01(monkeypatch):
 
     import pandas as pd
 
-    # Add the exercise directory to the Python path
-    exercise_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "03matplotlib01"))
-    sys.path.append(exercise_dir)
-
-    from main import create_scatter_plot
+    module = load_exercise("03matplotlib01", monkeypatch)
+    create_scatter_plot = module.create_scatter_plot
     df = pd.DataFrame({
         'expt': [1, 2, 3],
         'calc': [1.1, 2.1, 3.1]
@@ -204,35 +212,29 @@ def test_03matplotlib01():
 
     # Test the function with a simple example
     fig, ax = create_scatter_plot(df)
-    
+
     assert len(ax.collections) == 1  # One scatter plot
     assert ax.get_xlabel() == 'Experimental'
     assert ax.get_ylabel() == 'Calculated'
 
-def test_03matplotlib02():
+
+def test_03matplotlib02(monkeypatch):
     import pandas as pd
 
-    # Add the exercise directory to the Python path
-    exercise_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "03matplotlib02"))
-    sys.path.append(exercise_dir)
-
-    from main import create_dual_plots
+    module = load_exercise("03matplotlib02", monkeypatch)
+    create_dual_plots = module.create_dual_plots
 
     df = pd.DataFrame({
         'expt': [1, 2, 3],
         'calc': [1.1, 2.1, 3.1]
     })
-    
+
     fig, (ax1, ax2) = create_dual_plots(df)
-    
+
     # Test left subplot
     assert len(ax1.lines) == 1  # One line plot
     assert ax1.get_ylabel() == 'Experimental'
-    
+
     # Test right subplot
     assert len(ax2.lines) == 1  # One line plot
     assert ax2.get_ylabel() == 'Calculated'
-    
-
-
-
