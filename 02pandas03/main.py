@@ -22,8 +22,8 @@ csv_filepath = os.path.join(exercise_dir, "SAMPL.csv")
 df = pd.read_csv(csv_filepath)
 
 # write your answer here
-ans = # your code here
-first_index = # your code here
+ans = None  # your code here
+first_index = None  # your code here
 
 # Keep this
 print(f"First index value: {first_index}")

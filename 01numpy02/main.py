@@ -8,4 +8,4 @@ to create a matrix that is n x n matrix with 1's on diagonal and 0's elsewhere. 
 import numpy as np
 
 # Fill in your code here.
-answer =
+answer = None  # your code here

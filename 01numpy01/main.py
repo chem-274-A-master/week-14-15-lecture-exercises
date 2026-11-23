@@ -32,7 +32,7 @@ def reshape_array(arr):
             - third_dimension_size (int): The size of the third dimension.
 
     Raises:
-        ValueError: If the array size is not compatible with the desired shape.
+        InvalidShapeError: If the array size is not compatible with the desired shape.
     """
 
     # Your code here!

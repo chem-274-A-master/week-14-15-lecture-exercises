@@ -19,7 +19,7 @@ def round_method(df):
     # Your line of code should be df.SOMETHING() 
     # where SOMETHING is a pandas method that performs the operation.
     
-    rounded_df = # your code here
+    rounded_df = None  # your code here
     
     return rounded_df
 
@@ -29,7 +29,7 @@ def apply_method(df):
     # use the apply method to round all values.
     # apply the built-in round function.
     
-    rounded_df = # your code here
+    rounded_df = None  # your code here
 
     return rounded_df
 

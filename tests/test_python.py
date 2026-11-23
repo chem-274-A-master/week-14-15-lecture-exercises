@@ -145,36 +145,44 @@ def test_02pandas03(monkeypatch):
 
     # Test that reference data and the answer are the same
     assert ans.equals(reference_df), "DataFrames are not equal."
+    assert module.first_index == reference_df.index[0], "First index value is incorrect."
 
 
 def test_02pandas04(monkeypatch):
 
     import pandas as pd
 
-    import inspect
-
     module = load_exercise("02pandas04", monkeypatch)
     round_method = module.round_method
     apply_method = module.apply_method
 
-    source1 = inspect.getsource(round_method)
-    source2 = inspect.getsource(apply_method)
-
-    assert "df.round()" in source1, "Method 1 does not use pandas method."
-    assert "df.apply(" in source2, "Method 2 does not use apply method."
-
-    # Make a small dataframe for testing
+    # Include negative values and half-integers, and preserve row/column labels.
     df = pd.DataFrame({
-        'A': [1.234, 2.345, 3.456],
-        'B': [4.567, 5.678, 6.789]
-    })
+        'A': [1.234, -2.7, 2.5],
+        'B': [4.567, -0.2, 3.5]
+    }, index=['sample-a', 'sample-b', 'sample-c'])
+    expected = df.round()
 
-    # Test the two methods
-    rounded1 = round_method(df)
-    rounded2 = apply_method(df)
+    # Check method use at runtime so formatting and argument names do not matter.
+    original_round = pd.DataFrame.round
+    original_apply = pd.DataFrame.apply
+    calls = {"round": 0, "apply": 0}
 
-    # Assert that the two methods give the same result
-    assert rounded1.equals(rounded2), "The two methods do not give the same result."
+    def track_round(frame, *args, **kwargs):
+        calls["round"] += 1
+        return original_round(frame, *args, **kwargs)
+
+    def track_apply(frame, *args, **kwargs):
+        calls["apply"] += 1
+        return original_apply(frame, *args, **kwargs)
+
+    monkeypatch.setattr(pd.DataFrame, "round", track_round)
+    monkeypatch.setattr(pd.DataFrame, "apply", track_apply)
+
+    pd.testing.assert_frame_equal(round_method(df.copy()), expected)
+    assert calls["round"] > 0, "Method 1 should use the DataFrame rounding method."
+    pd.testing.assert_frame_equal(apply_method(df.copy()), expected)
+    assert calls["apply"] > 0, "Method 2 should use DataFrame.apply."
 
 
 def test_02pandas05(monkeypatch):
@@ -206,8 +214,8 @@ def test_03matplotlib01(monkeypatch):
     module = load_exercise("03matplotlib01", monkeypatch)
     create_scatter_plot = module.create_scatter_plot
     df = pd.DataFrame({
-        'expt': [1, 2, 3],
-        'calc': [1.1, 2.1, 3.1]
+        'expt': [-2, 0.5, 4],
+        'calc': [3.1, -1.2, 0.7]
     })
 
     # Test the function with a simple example
@@ -216,6 +224,10 @@ def test_03matplotlib01(monkeypatch):
     assert len(ax.collections) == 1  # One scatter plot
     assert ax.get_xlabel() == 'Experimental'
     assert ax.get_ylabel() == 'Calculated'
+    assert ax.figure is fig
+    np.testing.assert_allclose(
+        ax.collections[0].get_offsets(), df[['expt', 'calc']].to_numpy()
+    )
 
 
 def test_03matplotlib02(monkeypatch):
@@ -225,8 +237,8 @@ def test_03matplotlib02(monkeypatch):
     create_dual_plots = module.create_dual_plots
 
     df = pd.DataFrame({
-        'expt': [1, 2, 3],
-        'calc': [1.1, 2.1, 3.1]
+        'expt': [-2, 0.5, 4],
+        'calc': [3.1, -1.2, 0.7]
     })
 
     fig, (ax1, ax2) = create_dual_plots(df)
@@ -238,3 +250,13 @@ def test_03matplotlib02(monkeypatch):
     # Test right subplot
     assert len(ax2.lines) == 1  # One line plot
     assert ax2.get_ylabel() == 'Calculated'
+
+    assert len(fig.axes) == 2
+    for position, (ax, column) in enumerate(((ax1, 'expt'), (ax2, 'calc'))):
+        assert ax.figure is fig
+        assert ax.get_xlabel() == 'Index'
+        np.testing.assert_allclose(ax.lines[0].get_xdata(), np.arange(len(df)))
+        np.testing.assert_allclose(ax.lines[0].get_ydata(), df[column].to_numpy())
+        subplot = ax.get_subplotspec()
+        assert subplot.get_gridspec().get_geometry() == (1, 2)
+        assert subplot.num1 == position

@@ -18,7 +18,7 @@ exercise_dir = os.path.dirname(__file__)
 csv_filepath = os.path.join(exercise_dir, "SAMPL.csv")
 
 # load the data
-df = # your code here - you need to use the csv_filepath variable for the test to pass
+df = None  # your code here - you need to use the csv_filepath variable for the test to pass
 
 # calculate mean experimental value
-expt_mean = # your code here
+expt_mean = None  # your code here
